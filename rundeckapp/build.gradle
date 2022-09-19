@@ -274,6 +274,7 @@ bootRun {
         implementation project(':grails-webhooks')
         implementation project(':grails-execution-mode-timer')
     }
+    dependsOn copyRuntimeLibs, 'vendorAssetDeps'
 
     main 'rundeckapp.Application'
     ignoreExitValue true
@@ -393,6 +394,29 @@ task('copyPluginLibs').dependsOn(configurations.pluginFiles).doLast {
 
 archivesBaseName = 'rundeck'
 
+task vendorAssetDeps(type: NpmTask) { it ->
+
+    def baseDir = "${projectDir}/grails-app/assets/javascripts"
+
+    it.inputs.file "${baseDir}/_package-manager/package.json"
+    it.inputs.file "${baseDir}/_package-manager/package-lock.json"
+    it.inputs.file "${baseDir}/_package-manager/webpack.mix.js"
+
+    it.outputs.dir "${baseDir}/vendor"
+
+    def npmCommand = System.env.CI ?
+            'ci:build' :
+            'dev:build'
+
+    it.args = ['run', npmCommand]
+
+    execOverrides {
+        it.workingDir = "${baseDir}/_package-manager"
+    }
+}
+
+assetPluginPackage.dependsOn vendorAssetDeps
+assetCompile.dependsOn vendorAssetDeps
 
 bootWar {
     enabled=true
