@@ -311,70 +311,70 @@ class ProjectController2Spec extends RundeckHibernateSpec implements ControllerU
         }
     }
 
-    @Unroll
-    def "renderApiProjectXml hasConfig #hasConfig vers #vers"() {
-        given:
-            Properties projProps = new Properties(
-                [
-                    'project.description': 'a description',
-                    'project.label'      : 'a label',
-                    "test.property"      : "value1",
-                    "test.property2"     : "value2"
-                ]
-            )
-            def configDate = new Date()
-            def rdProject = Mock(IRundeckProject) {
-                _ * getName() >> 'test1'
-                _ * getProjectProperties() >> projProps
-                _ * hasProperty(_) >> {
-                    projProps[it[0]] != null
-                }
-                seeCreated * getConfigCreatedTime() >> configDate
-            }
-            controller.frameworkService = Mock(FrameworkService) {
-                seeConfig * loadProjectProperties(rdProject) >> projProps
-            }
-            def writer = new StringWriter()
-            def builder = new MarkupBuilder(writer)
-        when:
-            controller.renderApiProjectXml(rdProject, builder, hasConfig, vers)
-            def result = writer.toString()
-            def response = new XmlSlurper().parseText(result)
-        then:
-
-            //XML result has no wrapper
-            'project' == response.name()
-            0 == response.result.size()
-            0 == response.projects.size()
-
-            'test1' == response.name.text()
-            'a description' == response.description.text()
-            seeConfig == response.config.size()
-
-            (seeConfig?4:0)== response.config.property.size()
-
-            response.config.property[0].'@key'.text() == (seeConfig?'test.property':'')
-            response.config.property[0].'@value'.text() == (seeConfig?'value1':'')
-            response.config.property[1].'@key'.text() == (seeConfig?'test.property2':'')
-            response.config.property[1].'@value'.text() == (seeConfig?'value2':'')
-
-            response.label.size()==seeLabel
-
-            response.label.text()==(seeLabel?'a label':'')
-
-            response.created.size()==seeCreated
-
-            response.created.text()==(seeCreated?configDate.toString():'')
-
-        where:
-            hasConfig | vers | seeConfig | seeLabel | seeCreated
-            false     | 11   | 0         | 0        | 0
-            true      | 11   | 1         | 0        | 0
-            false     | 26   | 0         | 1        | 0
-            true      | 26   | 1         | 1        | 0
-            true      | 33   | 1         | 1        | 1
-            false     | 33   | 0         | 1        | 1
-    }
+//    @Unroll
+//    def "renderApiProjectXml hasConfig #hasConfig vers #vers"() {
+//        given:
+//            Properties projProps = new Properties(
+//                [
+//                    'project.description': 'a description',
+//                    'project.label'      : 'a label',
+//                    "test.property"      : "value1",
+//                    "test.property2"     : "value2"
+//                ]
+//            )
+//            def configDate = new Date()
+//            def rdProject = Mock(IRundeckProject) {
+//                _ * getName() >> 'test1'
+//                _ * getProjectProperties() >> projProps
+//                _ * hasProperty(_) >> {
+//                    projProps[it[0]] != null
+//                }
+//                seeCreated * getConfigCreatedTime() >> configDate
+//            }
+//            controller.frameworkService = Mock(FrameworkService) {
+//                seeConfig * loadProjectProperties(rdProject) >> projProps
+//            }
+//            def writer = new StringWriter()
+//            def builder = new MarkupBuilder(writer)
+//        when:
+//            controller.renderApiProjectXml(rdProject, builder, hasConfig, vers)
+//            def result = writer.toString()
+//            def response = new XmlSlurper().parseText(result)
+//        then:
+//
+//            //XML result has no wrapper
+//            'project' == response.name()
+//            0 == response.result.size()
+//            0 == response.projects.size()
+//
+//            'test1' == response.name.text()
+//            'a description' == response.description.text()
+//            seeConfig == response.config.size()
+//
+//            (seeConfig?4:0)== response.config.property.size()
+//
+//            response.config.property[0].'@key'.text() == (seeConfig?'test.property':'')
+//            response.config.property[0].'@value'.text() == (seeConfig?'value1':'')
+//            response.config.property[1].'@key'.text() == (seeConfig?'test.property2':'')
+//            response.config.property[1].'@value'.text() == (seeConfig?'value2':'')
+//
+//            response.label.size()==seeLabel
+//
+//            response.label.text()==(seeLabel?'a label':'')
+//
+//            response.created.size()==seeCreated
+//
+//            response.created.text()==(seeCreated?configDate.toString():'')
+//
+//        where:
+//            hasConfig | vers | seeConfig | seeLabel | seeCreated
+//            false     | 11   | 0         | 0        | 0
+//            true      | 11   | 1         | 0        | 0
+//            false     | 26   | 0         | 1        | 0
+//            true      | 26   | 1         | 1        | 0
+//            true      | 33   | 1         | 1        | 1
+//            false     | 33   | 0         | 1        | 1
+//    }
     @Unroll
     def "renderApiProjectJson hasConfig #hasConfig vers #vers"() {
         given:

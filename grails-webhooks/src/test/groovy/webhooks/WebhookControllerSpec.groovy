@@ -19,18 +19,15 @@ import com.dtolabs.rundeck.core.authorization.AuthContextEvaluator
 import com.dtolabs.rundeck.core.authorization.AuthContextProvider
 import com.dtolabs.rundeck.core.authorization.SubjectAuthContext
 import com.dtolabs.rundeck.core.authorization.UserAndRolesAuthContext
-import com.dtolabs.rundeck.core.storage.ResourceMeta
 import com.dtolabs.rundeck.plugins.webhook.DefaultJsonWebhookResponder
 import com.dtolabs.rundeck.plugins.webhook.DefaultWebhookResponder
 import com.dtolabs.rundeck.plugins.webhook.WebhookDataImpl
 import com.dtolabs.rundeck.plugins.webhook.WebhookResponder
 import grails.testing.web.controllers.ControllerUnitTest
 import org.rundeck.core.auth.AuthConstants
-import org.rundeck.storage.api.Resource
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import javax.rmi.CORBA.Stub
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

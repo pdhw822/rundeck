@@ -6,8 +6,10 @@ apply plugin: 'java';
 apply plugin: 'eclipse';
 apply plugin: 'idea';
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.toVersion("11")
+    targetCompatibility = JavaVersion.toVersion("11")
+}
 
 
 repositories {

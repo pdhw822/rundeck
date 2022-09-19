@@ -98,7 +98,14 @@ public class JobOptionImpl implements JobOption, Comparable {
             }else{
                 builder.valuesListDelimiter = DEFAULT_DELIMITER;
             }
-            builder.valuesList = produceValuesList(builder);
+            if (builder.values != null) {
+                if (builder.valuesListDelimiter == null) {
+                    builder.valuesListDelimiter = DEFAULT_DELIMITER;
+                }
+                builder.valuesList = String.join(builder.valuesListDelimiter, builder.values);
+            }else{
+                builder.valuesList = "";
+            }
             builder.values = null;
         }
         if(option.containsKey("multivalued")){
@@ -128,20 +135,6 @@ public class JobOptionImpl implements JobOption, Comparable {
             builder.hidden((Boolean) option.get("hidden"));
         }
         return builder.build();
-    }
-
-
-    static private String produceValuesList(JobOptionImplBuilder builder) {
-        if (builder.values != null) {
-            if (builder.valuesListDelimiter == null) {
-                builder.valuesListDelimiter = DEFAULT_DELIMITER;
-            }
-            builder.valuesList = String.join(builder.valuesListDelimiter, builder.values);
-            builder.values = null;
-            return builder.valuesList;
-        }else{
-            return "";
-        }
     }
 
     @Override
