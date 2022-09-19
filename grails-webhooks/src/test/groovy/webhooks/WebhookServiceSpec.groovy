@@ -16,8 +16,8 @@
 package webhooks
 
 import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenManager
-import org.rundeck.app.data.model.v1.AuthTokenMode
-import org.rundeck.app.data.model.v1.AuthenticationToken;
+import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenType
+import com.dtolabs.rundeck.core.authentication.tokens.AuthenticationToken
 import com.dtolabs.rundeck.core.authorization.UserAndRolesAuthContext
 import com.dtolabs.rundeck.core.config.FeatureService
 import com.dtolabs.rundeck.core.config.Features
@@ -638,7 +638,7 @@ class WebhookServiceSpec extends Specification implements ServiceUnitTest<Webhoo
     }
 
     interface MockApiService {
-        Map generateUserToken(UserAndRolesAuthContext ctx, Integer expiration, String user, Set<String> roles, boolean forceExpiration, AuthenticationToken.AuthTokenType tokenType) throws Exception
+        Map generateUserToken(UserAndRolesAuthContext ctx, Integer expiration, String user, Set<String> roles, boolean forceExpiration, AuthTokenType tokenType) throws Exception
     }
 
     interface MockStorageService {
@@ -658,7 +658,7 @@ class WebhookServiceSpec extends Specification implements ServiceUnitTest<Webhoo
         String ownerName
 
         @Override
-        Set<String> getAuthRolesSet() {
+        Set<String> authRolesSet() {
             return authRoles
         }
 
@@ -679,16 +679,6 @@ class WebhookServiceSpec extends Specification implements ServiceUnitTest<Webhoo
 
         @Override
         String getName() {
-            return null
-        }
-
-        @Override
-        String getClearToken() {
-            return null
-        }
-
-        @Override
-        AuthTokenMode getTokenMode() {
             return null
         }
     }

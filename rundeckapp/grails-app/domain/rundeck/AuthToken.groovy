@@ -17,8 +17,9 @@
 package rundeck
 
 import com.dtolabs.rundeck.app.support.DomainIndexHelper
-import org.rundeck.app.data.model.v1.AuthTokenMode
-import org.rundeck.app.data.model.v1.AuthenticationToken
+import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenMode
+import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenType
+import com.dtolabs.rundeck.core.authentication.tokens.AuthenticationToken
 
 import java.time.Clock
 
@@ -75,7 +76,7 @@ class AuthToken implements AuthenticationToken {
     }
 
     /**
-     * Encodes a clear token value according to the tokenMode supplied.
+     * Encodes a clear token value acording to the tokenMode supplied.
      */
     public static String encodeTokenValue(String clearValue, AuthTokenMode mode){
         if(!clearValue)
@@ -147,7 +148,7 @@ class AuthToken implements AuthenticationToken {
     }
 
     @Override
-    Set<String> getAuthRolesSet() {
+    Set<String> authRolesSet() {
         return parseAuthRoles(authRoles)
     }
 

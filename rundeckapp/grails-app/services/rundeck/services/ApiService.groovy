@@ -16,24 +16,25 @@
 
 package rundeck.services
 
-import org.rundeck.app.data.model.v1.AuthTokenMode
-import org.rundeck.app.data.model.v1.AuthenticationToken.AuthTokenType
-import org.rundeck.app.data.model.v1.AuthenticationToken
-import org.rundeck.app.data.model.v1.SimpleTokenBuilder
+import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenMode
+import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenType
+import com.dtolabs.rundeck.core.authentication.tokens.AuthenticationToken
+import com.dtolabs.rundeck.core.authentication.tokens.SimpleTokenBuilder
 import com.dtolabs.rundeck.core.authorization.AuthorizationUtil
 import com.dtolabs.rundeck.core.authorization.UserAndRolesAuthContext
 import com.dtolabs.rundeck.core.authorization.Validation
-import org.rundeck.app.data.providers.v1.TokenDataProvider
 import org.rundeck.app.web.WebUtilService
 import org.rundeck.app.authorization.AppAuthContextEvaluator
 import org.rundeck.core.auth.AuthConstants
 import grails.converters.JSON
 import grails.gorm.transactions.Transactional
 import grails.web.JSONBuilder
+import groovy.transform.CompileStatic
 import groovy.xml.MarkupBuilder
 import org.apache.commons.lang.RandomStringUtils
-import org.rundeck.spi.data.DataManager
+import org.grails.web.converters.exceptions.ConverterException
 import org.rundeck.util.Sizes
+import rundeck.AuthToken
 import rundeck.Execution
 import rundeck.User
 import com.dtolabs.rundeck.app.api.ApiVersions
@@ -53,11 +54,6 @@ class ApiService implements WebUtilService{
     def userService
     @Delegate
     WebUtilService rundeckWebUtil
-    DataManager rundeckDataManager
-
-    private TokenDataProvider getTokenProvider() {
-        rundeckDataManager.getProviderForType(TokenDataProvider)
-    }
 
     public static final Map<String,String> HTTP_METHOD_ACTIONS = Collections.unmodifiableMap (
             POST: AuthConstants.ACTION_CREATE,
@@ -104,11 +100,11 @@ class ApiService implements WebUtilService{
      * @param tokenData Token metadata.
      * @return Generated token.
      */
-    private AuthenticationToken generateAuthToken(
+    private AuthToken generateAuthToken(
             User ownerUser,
             AuthenticationToken tokenData) {
 
-        Set<String> roles = tokenData.getAuthRolesSet()
+        Set<String> roles = tokenData.authRolesSet()
         Date expiration = tokenData.getExpiration()
 
         AuthTokenType tokenType = tokenData.type ?: AuthTokenType.USER
@@ -116,28 +112,36 @@ class ApiService implements WebUtilService{
 
         def uuid = UUID.randomUUID().toString()
         String newtoken = tokenData.token?:genRandomString()
-        String encToken = AuthenticationToken.encodeTokenValue(newtoken, tokenMode)
+        String encToken = AuthToken.encodeTokenValue(newtoken, tokenMode)
 
         // regenerate if we find collisions.
-        while (tokenProvider.tokenLookup(encToken) != null) {
+        while (AuthToken.tokenLookup(encToken) != null) {
             newtoken = genRandomString()
-            encToken = AuthenticationToken.encodeTokenValue(newtoken, tokenMode)
+            encToken = AuthToken.encodeTokenValue(newtoken, tokenMode)
         }
 
-        SimpleTokenBuilder token1 =  new SimpleTokenBuilder()
-                .setToken(newtoken)
-                .setCreator(tokenData.creator)
-                .setOwnerName(tokenData.ownerName)
-                .setAuthRolesSet(roles)
-                .setExpiration(expiration)
-                .setType(tokenType)
-                .setName(tokenData.name)
-                .setUuid(uuid)
+        AuthToken token = new AuthToken(
+            token: newtoken,
+            authRoles: AuthToken.generateAuthRoles(roles),
+            user: ownerUser,
+            expiration: expiration,
+            uuid: uuid,
+            creator: tokenData.creator,
+            name: tokenData.name,
+            type: tokenType,
+            tokenMode: tokenMode
+        )
 
-
-        String id = tokenProvider.create(token1);
-        AuthenticationToken token = tokenProvider.getData(id)
-        return token
+        if (token.save(flush:true)) {
+            log.info(
+                    "GENERATE TOKEN: ID:${uuid} creator:${tokenData.creator} username:${ownerUser.login} roles:"
+                            + "${token.authRoles} expiration:${expiration}"
+            )
+            return token
+        } else {
+            println token.errors.allErrors.collect { messageSource.getMessage(it,null) }.join(",")
+            throw new Exception("Failed to save token for User ${ownerUser.login}")
+        }
     }
 
     /**
@@ -148,31 +152,37 @@ class ApiService implements WebUtilService{
     def Map authResourceForUserToken(String username, Set<String> roles) {
         return AuthorizationUtil.resource(
                 AuthConstants.TYPE_APITOKEN,
-                [username: username, roles: AuthenticationToken.generateAuthRoles(roles)]
+                [username: username, roles: AuthToken.generateAuthRoles(roles)]
         )
     }
     /**
      * Find a token by UUID and creator
      */
-    AuthenticationToken findUserTokenId(String creator, String id) {
-        tokenProvider.findByUuidAndCreator(id, creator)
+    AuthToken findUserTokenId(String creator, String id) {
+        AuthToken.findByUuidAndCreator(id, creator)
     }
 
     /**
      * Find a token by UUID and creator
      */
-    List<AuthenticationToken> findUserTokensCreator(String creator) {
-        tokenProvider.findAllByCreator(creator)
+    List<AuthToken> findUserTokensCreator(String creator) {
+        AuthToken.findAllByCreator(creator)
     }
 
     /**
      * Find a token by UUID
      */
-    AuthenticationToken findTokenId(String id) {
-        tokenProvider.getData(id)
+    AuthToken findTokenId(String id) {
+        AuthToken.findByUuid(id)
     }
 
     /**
+     * Find a token by UUID
+     */
+    AuthToken findUserTokenValue(String token) {
+        AuthToken.findByToken(token)
+    }
+
     /**
      * Generate an auth token
      * @param authContext user's own auth context
@@ -182,7 +192,7 @@ class ApiService implements WebUtilService{
      * @param tokenRoles role list for token, or null to use all owner roles (user token only)
      * @return
      */
-    AuthenticationToken generateUserToken(
+    AuthToken generateUserToken(
             UserAndRolesAuthContext authContext,
             Integer tokenTimeSeconds,
             String username,
@@ -203,7 +213,7 @@ class ApiService implements WebUtilService{
      * @param tokenRoles role list for token, or null to use all owner roles (user token only)
      * @return
      */
-    AuthenticationToken createUserToken(
+    AuthToken createUserToken(
             UserAndRolesAuthContext authContext,
             Integer tokenTimeSeconds,
             String token,
@@ -869,16 +879,15 @@ class ApiService implements WebUtilService{
         )
     }
 
-    def removeToken(final AuthenticationToken token) {
+    def removeToken(final AuthToken authToken) {
 
-        def user = token.getOwnerName()
-        def creator = token.getCreator() ?: user
-        def id = token.getUuid()
-        def oldAuthRoles = token.getAuthRolesSet()
+        def user = authToken.user
+        def creator = authToken.creator ?: user.login
+        def id = authToken.uuid ?: authToken.id
+        def oldAuthRoles = authToken.authRoles
 
-        tokenProvider.delete(id)
-
-        log.info("DELETED TOKEN ${id} (creator:$creator) User ${user} with roles: ${oldAuthRoles}")
+        authToken.delete(flush: true)
+        log.info("DELETED TOKEN ${id} (creator:$creator) User ${user.login} with roles: ${oldAuthRoles}")
     }
 
     /**
@@ -889,10 +898,10 @@ class ApiService implements WebUtilService{
     @Transactional
     def removeAllExpiredTokens(final String creator) {
         def now = Date.from(Clock.systemUTC().instant())
-        List<AuthenticationToken> found = tokenProvider.findAllByCreatorAndExpirationLessThan(creator, now)
+        def found = AuthToken.findAllByCreatorAndExpirationLessThan(creator, now)
         if (found) {
             found.each {
-                tokenProvider.delete(it.uuid)
+                it.delete()
             }
         }
         found.size()
@@ -906,32 +915,12 @@ class ApiService implements WebUtilService{
     @Transactional
     def removeAllExpiredTokens() {
         def now = Date.from(Clock.systemUTC().instant())
-        def found = tokenProvider.findAllByExpirationLessThan(now)
+        def found = AuthToken.findAllByExpirationLessThan(now)
         if (found) {
             found.each {
-                tokenProvider.delete(it.uuid)
+                it.delete()
             }
         }
         found.size()
-    }
-
-    @Transactional
-    AuthenticationToken findByTokenAndCreator(final String token, String creator){
-        return tokenProvider.findAllByCreator(token, creator)
-    }
-
-    @Transactional
-    AuthenticationToken tokenLookup(final String token){
-        return tokenProvider.tokenLookup(token)
-    }
-
-    @Transactional
-    AuthenticationToken tokenLookupWithType(final String token, AuthenticationToken.AuthTokenType type){
-        return tokenProvider.tokenLookupWithType(token, type)
-    }
-
-    @Transactional
-    List<AuthenticationToken> listTokens(){
-        return tokenProvider.list()
     }
 }

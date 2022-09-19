@@ -3,15 +3,16 @@ package rundeck.interceptors
 import com.dtolabs.rundeck.core.authentication.Group
 import com.dtolabs.rundeck.core.authentication.Token
 import com.dtolabs.rundeck.core.authentication.Username
-import org.rundeck.app.data.model.v1.AuthenticationToken.AuthTokenType
-import org.rundeck.app.data.model.v1.AuthenticationToken
-import org.rundeck.app.data.model.v1.SimpleTokenBuilder
+import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenType
+import com.dtolabs.rundeck.core.authentication.tokens.AuthenticationToken
+import com.dtolabs.rundeck.core.authentication.tokens.SimpleTokenBuilder
 import groovy.transform.PackageScope
 import org.rundeck.app.access.InterceptorHelper
 import org.rundeck.web.infosec.AuthorizationRoleSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.core.context.SecurityContextHolder
+import rundeck.AuthToken
 import rundeck.User
 import rundeck.services.ApiService
 import rundeck.services.ConfigurationService
@@ -102,13 +103,13 @@ class SetUserInterceptor {
                 session.subject=null
                 session.user=null
                 if(authtoken){
-                    request.invalidAuthToken = "Token:" + AuthenticationToken.printable(authtoken)
+                    request.invalidAuthToken = "Token:" + AuthToken.printable(authtoken)
                 }
                 request.authenticatedToken = null
                 request.authenticatedUser = null
                 request.invalidApiAuthentication = true
                 if(authtoken){
-                    log.error("Invalid API token used: ${AuthenticationToken.printable(authtoken)}");
+                    log.error("Invalid API token used: ${AuthToken.printable(authtoken)}");
                 }else{
                     log.error("Unauthenticated API request");
                 }
@@ -203,13 +204,13 @@ class SetUserInterceptor {
             }
         }
 
-        AuthenticationToken tokenobj = null
+        AuthToken tokenobj = null
         if(webhookType) {
-            tokenobj = apiService.tokenLookupWithType(authtoken,AuthTokenType.WEBHOOK)
+            tokenobj = AuthToken.tokenLookup(authtoken,AuthTokenType.WEBHOOK)
         } else if(request.getAttribute(RUNNER_RQ_ATTRIB)) {
-            tokenobj = apiService.tokenLookupWithType(authtoken, AuthTokenType.RUNNER)
+            tokenobj = AuthToken.tokenLookup(authtoken, AuthTokenType.RUNNER)
         } else {
-            tokenobj = apiService.tokenLookup(authtoken)
+            tokenobj = AuthToken.tokenLookup(authtoken)
         }
 
         if (tokenobj) {

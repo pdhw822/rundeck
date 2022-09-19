@@ -21,7 +21,7 @@ import com.dtolabs.rundeck.app.api.tokens.CreateTokenStringRoles
 import com.dtolabs.rundeck.app.api.tokens.ListTokens
 import com.dtolabs.rundeck.app.api.tokens.RemoveExpiredTokens
 import com.dtolabs.rundeck.app.api.tokens.Token
-
+import com.dtolabs.rundeck.core.authentication.tokens.AuthTokenType
 import com.dtolabs.rundeck.core.authorization.AuthContext
 import com.dtolabs.rundeck.core.authorization.UserAndRolesAuthContext
 import groovy.transform.CompileStatic
@@ -35,14 +35,16 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody
 import org.rundeck.app.api.model.ApiErrorResponse
 import org.rundeck.app.api.model.LinkListResponse
 import org.rundeck.app.api.model.SystemInfoModel
+import org.rundeck.app.authorization.AppAuthContextProcessor
+import org.rundeck.core.auth.AuthConstants
 import com.dtolabs.rundeck.core.extension.ApplicationExtension
 import com.sun.management.OperatingSystemMXBean
 import grails.web.mapping.LinkGenerator
-import org.rundeck.app.data.model.v1.AuthenticationToken
 import org.rundeck.core.auth.AuthConstants
 import org.rundeck.core.auth.app.RundeckAccess
 import org.rundeck.core.auth.web.RdAuthorizeSystem
 import org.rundeck.util.Sizes
+import rundeck.AuthToken
 import rundeck.services.ConfigurationService
 
 import javax.servlet.http.HttpServletResponse
@@ -313,7 +315,7 @@ class ApiController extends ControllerBase{
     @Tag(name = "tokens")
     @CompileStatic
     def apiTokenGet(String tokenid) {
-        AuthenticationToken oldtoken = validateTokenRequest(tokenid)
+        AuthToken oldtoken = validateTokenRequest(tokenid)
 
         if (!oldtoken) {
             return
@@ -323,7 +325,7 @@ class ApiController extends ControllerBase{
     }
 
     @CompileStatic
-    private AuthenticationToken validateTokenRequest(String tokenid){
+    private AuthToken validateTokenRequest(String tokenid){
         if (!apiService.requireApi(request, response)) {
             return null
         }
@@ -339,11 +341,12 @@ class ApiController extends ControllerBase{
         UserAndRolesAuthContext authContext = systemAuthContext
         def adminAuth = apiService.hasTokenAdminAuth(authContext)
 
+
         //admin: search by token ID
         //user: search for token ID owned by user
-        AuthenticationToken oldtoken = adminAuth ?
-                apiService.findTokenId(tokenid) :
-                apiService.findUserTokenId(authContext.username, tokenid)
+        AuthToken oldtoken = adminAuth ?
+                             apiService.findTokenId(tokenid) :
+                             apiService.findUserTokenId(authContext.username, tokenid)
 
         if (!apiService.requireExistsFormat(response, oldtoken, ['Token', tokenid])) {
             return null
@@ -382,7 +385,7 @@ class ApiController extends ControllerBase{
     @Tag(name = "tokens")
     @CompileStatic
     def apiTokenDelete(String tokenid) {
-        AuthenticationToken oldtoken = validateTokenRequest(tokenid)
+        AuthToken oldtoken = validateTokenRequest(tokenid)
 
         if (!oldtoken) {
             return
@@ -446,18 +449,17 @@ class ApiController extends ControllerBase{
         if (!adminAuth && user && user != authContext.username) {
             return apiService.renderUnauthorized(response, [AuthConstants.ACTION_ADMIN, 'User', user])
         }
-        List<AuthenticationToken> tokenlist
+        def tokenlist
         if (user) {
             tokenlist = apiService.findUserTokensCreator(user)
         } else if (!adminAuth) {
             tokenlist = apiService.findUserTokensCreator(authContext.username)
         } else {
-            tokenlist = apiService.listTokens()
+            tokenlist = AuthToken.list()
         }
 
-
-        def data = new ListTokens(user, !user, tokenlist.findAll {tkn->
-            tkn.getType() != AuthenticationToken.AuthTokenType.WEBHOOK
+        def data = new ListTokens(user, !user, tokenlist.findAll {
+            it.type != AuthTokenType.WEBHOOK
         }.collect {
             new Token(it, true, apiVersion < ApiVersions.V19)
         })
@@ -614,14 +616,14 @@ Since: v11
         }
         Set<String> rolesSet=null
         if (roles instanceof String) {
-            rolesSet = AuthenticationToken.parseAuthRoles(roles)
+            rolesSet = AuthToken.parseAuthRoles(roles)
         } else if (roles instanceof Collection) {
             rolesSet = new HashSet(roles)
         }
         if (rolesSet.size() == 1 && rolesSet.contains('*')) {
             rolesSet = null
         }
-        AuthenticationToken token
+        AuthToken token
 
         Integer tokenDurationSeconds = tokenDuration ? Sizes.parseTimeDuration(tokenDuration) : 0
         if (tokenDuration && !Sizes.validTimeDuration(tokenDuration)) {
@@ -639,7 +641,7 @@ Since: v11
                     tokenuser,
                     rolesSet,
                     true,
-                    AuthenticationToken.AuthTokenType.USER,
+                    AuthTokenType.USER,
                     tokenName
             )
         } catch (Exception e) {

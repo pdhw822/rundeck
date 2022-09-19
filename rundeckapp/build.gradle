@@ -70,13 +70,11 @@ dependencies {
     //Rundeck plugin dependencies
     pluginFiles project.findProperty('bundledPlugins')?:[]
 
-    spa project(path: ':rundeckapp:grails-spa', configuration: 'spa')
+//    spa project(path: ':rundeckapp:grails-spa', configuration: 'spa')
 
     // Rundeck project dependencies.
     implementation project(':core')
     implementation project(':rundeck-storage:rundeck-storage-filesys')
-    implementation project(':rundeck-data-model')
-    implementation project(':rundeck-data-spi')
 
 
     /** It's important that the configuration addition follow the form 'compile project("")'
@@ -176,7 +174,7 @@ dependencies {
     profile ("org.grails.profiles:web"){
         exclude(group:"org.grails.profiles",module:"web")
     }
-    
+
     // OpenApi Dependencies
     compileOnly "io.micronaut.openapi:micronaut-openapi:4.0.1"
     implementation "io.swagger.core.v3:swagger-annotations:2.1.13"
@@ -185,6 +183,7 @@ dependencies {
     implementation "io.micronaut:micronaut-inject-java:${micronautVersion}"
     implementation "io.micronaut:micronaut-inject-groovy:${micronautVersion}"
     implementation "io.micronaut:micronaut-core:${micronautVersion}"
+
 
     runtimeOnly 'org.aspectj:aspectjweaver:1.9.7'
     runtimeOnly "com.h2database:h2:2.1.210"
@@ -276,7 +275,7 @@ bootRun {
         implementation project(':grails-webhooks')
         implementation project(':grails-execution-mode-timer')
     }
-    dependsOn 'copySpa', copyRuntimeLibs, 'vendorAssetDeps'
+   // dependsOn 'copySpa', copyRuntimeLibs, 'vendorAssetDeps'
     main 'rundeckapp.Application'
     ignoreExitValue true
     jvmArgs(
@@ -393,39 +392,39 @@ task('copyPluginLibs').dependsOn(configurations.pluginFiles).doLast {
     }
 }
 
-task copySpa(type: Copy) {
-    from( configurations.spa){
-        include('provided/**')
-    }
-    into "$projectDir/grails-app/assets"
-    outputs.dir "$projectDir/grails-app/assets/provided"
-}
-assetPluginPackage.dependsOn copySpa
-assetCompile.dependsOn copySpa
-
-task vendorAssetDeps(type: NpmTask) { it ->
-    dependsOn copySpa
-    def baseDir = "${projectDir}/grails-app/assets/javascripts"
-
-    it.inputs.file "${baseDir}/_package-manager/package.json"
-    it.inputs.file "${baseDir}/_package-manager/package-lock.json"
-    it.inputs.file "${baseDir}/_package-manager/webpack.mix.js"
-
-    it.outputs.dir "${baseDir}/vendor"
-
-    def npmCommand = System.env.CI ?
-            'ci:build' :
-            'dev:build'
-
-    it.args = ['run', npmCommand]
-
-    execOverrides {
-        it.workingDir = "${baseDir}/_package-manager"
-    }
-}
-
-assetPluginPackage.dependsOn vendorAssetDeps
-assetCompile.dependsOn vendorAssetDeps
+//task copySpa(type: Copy) {
+//    from( configurations.spa){
+//        include('provided/**')
+//    }
+//    into "$projectDir/grails-app/assets"
+//    outputs.dir "$projectDir/grails-app/assets/provided"
+//}
+//assetPluginPackage.dependsOn copySpa
+//assetCompile.dependsOn copySpa
+//
+//task vendorAssetDeps(type: NpmTask) { it ->
+//    dependsOn copySpa
+//    def baseDir = "${projectDir}/grails-app/assets/javascripts"
+//
+//    it.inputs.file "${baseDir}/_package-manager/package.json"
+//    it.inputs.file "${baseDir}/_package-manager/package-lock.json"
+//    it.inputs.file "${baseDir}/_package-manager/webpack.mix.js"
+//
+//    it.outputs.dir "${baseDir}/vendor"
+//
+//    def npmCommand = System.env.CI ?
+//            'ci:build' :
+//            'dev:build'
+//
+//    it.args = ['run', npmCommand]
+//
+//    execOverrides {
+//        it.workingDir = "${baseDir}/_package-manager"
+//    }
+//}
+//
+//assetPluginPackage.dependsOn vendorAssetDeps
+//assetCompile.dependsOn vendorAssetDeps
 
 archivesBaseName = 'rundeck'
 
@@ -544,3 +543,6 @@ if (project.hasProperty('signing.keyId') && project.hasProperty('signing.passwor
     }
 }
 
+tasks.withType(Test).configureEach {
+    forkEvery = 500
+}

@@ -31,8 +31,10 @@
     <link rel="shortcut icon" href="${g.resource(dir: 'images', file: g.appFavicon())}"/>
     <link rel="apple-touch-icon-precomposed" href="${g.resource(dir: 'images', file: 'favicon-152.png')}"/>
     %{-- Core theme styles from ui-trellis --}%
+    <!-- 
     <asset:stylesheet href="static/css/components/theme.css"/>
-  
+    -->
+    <link rel="stylesheet" crossorigin href="/user-assets/ui-trellis-vite/css/index.css"/>
 
     <g:if test="${Environment.isDevelopmentEnvironmentAvailable()}">
         <asset:javascript src="vendor/vue.js"/>
@@ -115,10 +117,10 @@
                   <div class="card-header">
                     <h3 class="card-title">
                       <div class="logo">
-                          <g:set var="logoImage" value="${"static/img/${g.appLogo()}"}"/>
+                          <g:set var="logoImage" value="${"/user-assets/ui-trellis-vite/images/logos/${g.appLogo()}"}"/>
                           <g:set var="titleLink" value="${cfg.getString(config: "gui.titleLink")}"/>
                           <a href="${titleLink ? enc(attr:titleLink) : g.createLink(uri: '/')}" title="Home">
-                            <asset:image src="${logoImage}" alt="Rundeck" style="width: 200px;" onload="SVGInject(this)"/>
+                            <img src="${logoImage}" alt="Rundeck" style="width: 200px;" onload="SVGInject(this)"/>
                           </a>
 %{--                          <asset:image src="${g.message(code: 'app.login.logo')}"/>--}%
                           <g:set var="userDefinedLogo" value="${cfg.getString(config: "gui.logo")}"/>

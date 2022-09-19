@@ -143,22 +143,22 @@ def buildConf  = new org.yaml.snakeyaml.Yaml().load( file('./build.yaml').newDat
 project(':rundeckapp') {
     it.ext.bundledPlugins = buildConf.rundeck.plugins
 
-    it.ext.bundledPlugins += [
-        project(':plugins:script-plugin'),
-        project(':plugins:stub-plugin'),
-        project(':plugins:localexec-plugin'),
-        project(':plugins:copyfile-plugin'),
-        project(':plugins:job-state-plugin'),
-        project(':plugins:flow-control-plugin'),
-        project(':plugins:jasypt-encryption-plugin'),
-        project(':plugins:object-store-plugin'),
-        project(':plugins:azure-object-store-plugin'),
-        project(':plugins:orchestrator-plugin'),
-        project(':plugins:git-plugin'),
-        project(':plugins:audit-logging-plugin'),
-        project(':plugins:source-refresh-plugin'),
-        project(':plugins:upvar-plugin')
-    ]
+//    it.ext.bundledPlugins += [
+//        project(':plugins:script-plugin'),
+//        project(':plugins:stub-plugin'),
+//        project(':plugins:localexec-plugin'),
+//        project(':plugins:copyfile-plugin'),
+//        project(':plugins:job-state-plugin'),
+//        project(':plugins:flow-control-plugin'),
+//        project(':plugins:jasypt-encryption-plugin'),
+//        project(':plugins:object-store-plugin'),
+//        project(':plugins:azure-object-store-plugin'),
+//        project(':plugins:orchestrator-plugin'),
+//        project(':plugins:git-plugin'),
+//        project(':plugins:audit-logging-plugin'),
+//        project(':plugins:source-refresh-plugin'),
+//        project(':plugins:upvar-plugin')
+//    ]
 }
 
 // prompt for PGP key passphrase if not set

@@ -193,7 +193,7 @@ rundeck:
                 delimiter: ','
         useHMacRequestTokens: true
         httpHeaders:
-            enabled: true
+            enabled: false
             provider:
                 csp:
                     enabled: true

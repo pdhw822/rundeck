@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 SimplifyOps, Inc. (http://simplifyops.com)
+ * Copyright 2019 Rundeck, Inc. (http://rundeck.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.dtolabs.rundeck.core.authentication.tokens;
 
-/*
-* PropertyValidator.java
-* 
-* User: Greg Schueler <a href="mailto:greg@dtosolutions.com">greg@dtosolutions.com</a>
-* Created: 11/29/12 5:19 PM
-* 
-*/
-package com.dtolabs.rundeck.core.plugins.configuration;
-
-import java.util.*;
-
-
-/**
- * Validator can validate a value
- */
-public interface PropertyValidator {
-    public boolean isValid(String value) throws ValidationException;
+public enum AuthTokenMode {
+    LEGACY,
+    SECURED
 }
