@@ -31,8 +31,9 @@
     <link rel="favicon" href="${g.resource(dir: 'images', file: 'favicon-152.png')}"/>
     <link rel="shortcut icon" href="${g.resource(dir: 'images', file: g.appFavicon())}"/>
     <link rel="apple-touch-icon-precomposed" href="${g.resource(dir: 'images', file: 'favicon-152.png')}"/>
-    %{-- Core theme styles from ui-trellis --}%
-    <asset:stylesheet href="static/css/components/theme.css"/>
+
+    <cfg:setVar var="guiBase" key="gui.basePath" />
+    <link rel="stylesheet" href="${guiBase}/css/index.css"/>
 
     <g:if test="${Environment.isDevelopmentEnvironmentAvailable()}">
         <asset:javascript src="vendor/vue.js"/>

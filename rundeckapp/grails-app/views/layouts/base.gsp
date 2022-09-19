@@ -156,10 +156,11 @@
     </script>
 
     <g:jsonToken id="ui_token" url="${request.forwardURI}"/>
-    <asset:stylesheet href="static/css/chunk-vendors.css"/>
-    <asset:stylesheet href="static/css/chunk-common.css"/>
-    <asset:javascript src="static/js/chunk-common.js"/>
-    <asset:javascript src="static/js/chunk-vendors.js"/>
+
+    <link rel="stylesheet" href="${guiBase}/css/index.css"/>
+    <script type="module" crossorigin src="${guiBase}/index.js"></script>
+    <link rel="modulepreload" href="${guiBase}/vendor.js">
+
     %{-- Central should be loaded as soon as before any other Vue project code --}%
     <asset:javascript src="static/components/central.js"/>
     %{--  Navigation components load early too  --}%
