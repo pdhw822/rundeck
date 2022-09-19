@@ -256,6 +256,7 @@ rundeck:
             cpuProfile:
                 enabled: false
     gui:
+        basePath: /user-assets/rundeck-ui
         execution:
             tail:
                 lines:
