@@ -21,6 +21,7 @@
 <!--[if IE 9 ]>    <html class="ie9"> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!--> <html lang="${response.locale.language}"><!--<![endif]-->
 <head>
+    <cfg:setVar var="guiBase" key="gui.basePath" />
     <g:if test="${Environment.isDevelopmentEnvironmentAvailable()}">
         <asset:javascript src="vendor/vue.js"/>
     </g:if>

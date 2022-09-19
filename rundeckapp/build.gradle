@@ -70,8 +70,6 @@ dependencies {
     //Rundeck plugin dependencies
     pluginFiles project.findProperty('bundledPlugins')?:[]
 
-    spa project(path: ':rundeckapp:grails-spa', configuration: 'spa')
-
     // Rundeck project dependencies.
     implementation project(':core')
     implementation project(':rundeck-storage:rundeck-storage-filesys')
@@ -276,7 +274,7 @@ bootRun {
         implementation project(':grails-webhooks')
         implementation project(':grails-execution-mode-timer')
     }
-    dependsOn 'copySpa', copyRuntimeLibs, 'vendorAssetDeps'
+
     main 'rundeckapp.Application'
     ignoreExitValue true
     jvmArgs(
@@ -392,40 +390,6 @@ task('copyPluginLibs').dependsOn(configurations.pluginFiles).doLast {
         manifestProps.store(w,"generated manifest")
     }
 }
-
-task copySpa(type: Copy) {
-    from( configurations.spa){
-        include('provided/**')
-    }
-    into "$projectDir/grails-app/assets"
-    outputs.dir "$projectDir/grails-app/assets/provided"
-}
-assetPluginPackage.dependsOn copySpa
-assetCompile.dependsOn copySpa
-
-task vendorAssetDeps(type: NpmTask) { it ->
-    dependsOn copySpa
-    def baseDir = "${projectDir}/grails-app/assets/javascripts"
-
-    it.inputs.file "${baseDir}/_package-manager/package.json"
-    it.inputs.file "${baseDir}/_package-manager/package-lock.json"
-    it.inputs.file "${baseDir}/_package-manager/webpack.mix.js"
-
-    it.outputs.dir "${baseDir}/vendor"
-
-    def npmCommand = System.env.CI ?
-            'ci:build' :
-            'dev:build'
-
-    it.args = ['run', npmCommand]
-
-    execOverrides {
-        it.workingDir = "${baseDir}/_package-manager"
-    }
-}
-
-assetPluginPackage.dependsOn vendorAssetDeps
-assetCompile.dependsOn vendorAssetDeps
 
 archivesBaseName = 'rundeck'
 
@@ -544,3 +508,6 @@ if (project.hasProperty('signing.keyId') && project.hasProperty('signing.passwor
     }
 }
 
+tasks.withType(Test).configureEach {
+    forkEvery = 500
+}

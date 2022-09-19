@@ -539,6 +539,7 @@ public class RundeckConfigBase {
 
     @Data
     public static class RundeckGuiConfig {
+        String basePath;
         String instanceName;
         String startpage;
         String logo;
