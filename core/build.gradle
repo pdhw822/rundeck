@@ -69,7 +69,8 @@ dependencies {
         exclude group: 'pull-parser'
     }
 
-    api 'org.apache.ant:ant:1.10.12',
+    api 'com.github.pdhw822:rundeck-feature-api-lib:v0.1.0',
+        'org.apache.ant:ant:1.10.12',
         'org.slf4j:slf4j-api:1.7.32',
         'commons-codec:commons-codec:1.15',
         'commons-beanutils:commons-beanutils:1.9.4',
