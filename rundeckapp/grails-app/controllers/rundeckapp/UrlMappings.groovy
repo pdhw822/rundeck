@@ -230,6 +230,13 @@ class UrlMappings {
 
         "/api/$api_version/plugin/list"(controller: 'plugin', action: 'listPlugins')
 
+        "/api/$api_version/features/list"(controller: 'featureAdmin', action:'listFeatures')
+        "/api/$api_version/feature/${featureName}/actions"(controller: 'featureAdmin', action:'listActions')
+        "/api/$api_version/feature/${featureName}/toggleEnabled"(controller: 'featureAdmin', action:'toggleEnabled')
+        "/api/$api_version/act/$featureName/$actionName"(controller: 'feature', action:'executeFeatureAction')
+        "/api/$api_version/defineActionData/$featureName/$actionName"(controller: 'feature', action:'featureActionDataDefinition')
+        "/api/$api_version/output/$id"(controller: 'feature', action:'featureOutput')
+
         "/api/$api_version"(controller: 'api', action: 'info')
         //catchall
         "/api/$api_version/$other/$extra**?"(controller: 'api', action: 'invalid')

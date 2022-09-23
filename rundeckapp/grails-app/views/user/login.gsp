@@ -33,7 +33,7 @@
     %{-- Core theme styles from ui-trellis --}%
 
     <cfg:setVar var="guiBase" key="gui.basePath" />
-    <link rel="stylesheet" href="${guiBase}/css/index.css"/>
+    <link rel="stylesheet" href="${guiBase}/rundeck-ui/css/index.css"/>
 
     <g:if test="${Environment.isDevelopmentEnvironmentAvailable()}">
         <asset:javascript src="vendor/vue.js"/>

@@ -99,6 +99,13 @@ import org.rundeck.app.data.providers.GormTokenDataProvider
 import org.rundeck.app.services.EnhancedNodeService
 import org.rundeck.app.spi.RundeckSpiBaseServicesProvider
 import org.rundeck.core.auth.app.RundeckAccess
+import org.rundeck.features.config.ConfigurationServiceFeatureSetConfigProvider
+import org.rundeck.features.eventlistener.ActionOutputEventListener
+import org.rundeck.features.eventpublisher.GrailsAppActionEventPublisher
+import org.rundeck.features.eventpublisher.SpringAppActionEventPublisher
+import org.rundeck.features.menu.FeatureMenuItem
+import org.rundeck.features.output.MemoryFeatureActionOutputStore
+import org.rundeck.features.registry.SpringFeatureRegistry
 import org.rundeck.security.*
 import org.rundeck.spi.data.BaseDataManager
 import org.rundeck.web.ExceptionHandler
@@ -823,4 +830,10 @@ beans={
         ]
     }
 
+    featureRegistry(SpringFeatureRegistry)
+    actionEventPublisher(GrailsAppActionEventPublisher)
+    featureActionOutputStore(MemoryFeatureActionOutputStore)
+    actionOutputEventListener(ActionOutputEventListener)
+    featureSetConfigProvider(ConfigurationServiceFeatureSetConfigProvider)
+    featureMenuItem(FeatureMenuItem)
 }

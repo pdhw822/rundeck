@@ -184,6 +184,10 @@ dependencies {
     implementation "io.micronaut:micronaut-inject-groovy:${micronautVersion}"
     implementation "io.micronaut:micronaut-core:${micronautVersion}"
 
+    implementation "com.github.pdhw822:hello-world-feature:v0.7.0"
+    implementation "com.github.pdhw822:system-actions-feature:v0.5.0"
+    implementation "com.github.pdhw822:plugin-installer-feature:v0.4.0"
+
     runtimeOnly 'org.aspectj:aspectjweaver:1.9.7'
     runtimeOnly "com.h2database:h2:2.1.210"
 

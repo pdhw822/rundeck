@@ -157,9 +157,9 @@
 
     <g:jsonToken id="ui_token" url="${request.forwardURI}"/>
 
-    <link rel="stylesheet" href="${guiBase}/css/index.css"/>
-    <script type="module" crossorigin src="${guiBase}/index.js"></script>
-    <link rel="modulepreload" href="${guiBase}/vendor.js">
+    <link rel="stylesheet" href="${guiBase}/rundeck-ui/css/index.css"/>
+    <script type="module" crossorigin src="${guiBase}/rundeck-ui/index.js"></script>
+    <link rel="modulepreload" href="${guiBase}/rundeck-ui/vendor.js">
 
     %{-- Central should be loaded as soon as before any other Vue project code --}%
     <asset:javascript src="static/components/central.js"/>
