@@ -42,5 +42,18 @@ class MemoryFeatureActionOutputStore implements FeatureActionOutputStore {
         return rsp
     }
 
-
+    String barf() {
+        StringBuilder out = new StringBuilder()
+        List<ActionStartEvent> events = new ArrayList(storedStartEvents.values())
+        events.sort { a, b -> a.timestamp <=> b.timestamp }
+        events.each { se ->
+            out << "${se.timestamp} ${se.actionId} ${se.producer} ${se.user} ${se.feature} ${se.action}\n"
+            storedEvents[se.actionId].sort { a, b -> a.timestamp <=> b.timestamp }.each { e ->
+                out << "${e.timestamp} ${e.actionId} ${e.producer} ${e.user} ${e.level} ${e.message}\n"
+            }
+            def ce = storedCompletionEvents[se.actionId]
+            if(ce) out << "${ce.timestamp} ${ce.actionId} ${ce.producer} ${ce.user} ${ce.status}\n\n"
+        }
+        return out.toString()
+    }
 }

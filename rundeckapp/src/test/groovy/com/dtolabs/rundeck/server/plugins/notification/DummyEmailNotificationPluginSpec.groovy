@@ -1,15 +1,30 @@
 package com.dtolabs.rundeck.server.plugins.notification
 
 import com.dtolabs.rundeck.core.plugins.configuration.PropertyValidator
+import grails.testing.gorm.DataTest
 import grails.testing.mixin.integration.Integration
 import org.springframework.context.MessageSource
+import rundeck.CommandExec
+import rundeck.ExecReport
+import rundeck.Execution
+import rundeck.LogFileStorageRequest
 import rundeck.Notification
+import rundeck.Option
+import rundeck.ReferencedExecution
 import rundeck.ScheduledExecution
+import rundeck.ScheduledExecutionStats
+import rundeck.User
+import rundeck.Workflow
 import rundeck.services.ScheduledExecutionService
 import spock.lang.Specification
 
-@Integration
-class DummyEmailNotificationPluginSpec extends Specification {
+//@Integration
+class DummyEmailNotificationPluginSpec extends Specification  implements DataTest {
+
+    Class[] getDomainClassesToMock() {
+        [ScheduledExecution, Notification]
+    }
+
     def "property validators consistent with service validations" () {
         given:
         Map<PropertyValidator, Object> pluginValidations = [

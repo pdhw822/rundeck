@@ -8,6 +8,7 @@ import grails.events.annotation.Subscriber
 import grails.events.bus.EventBusAware
 import org.rundeck.features.output.FeatureActionOutputStore
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 
 class ActionOutputEventListener implements EventBusAware {
 

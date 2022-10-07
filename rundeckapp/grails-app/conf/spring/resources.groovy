@@ -101,11 +101,12 @@ import org.rundeck.app.spi.RundeckSpiBaseServicesProvider
 import org.rundeck.core.auth.app.RundeckAccess
 import org.rundeck.features.config.ConfigurationServiceFeatureSetConfigProvider
 import org.rundeck.features.eventlistener.ActionOutputEventListener
+import org.rundeck.features.eventlistener.EventBusFeatureActionExecutorService
 import org.rundeck.features.eventpublisher.GrailsAppActionEventPublisher
-import org.rundeck.features.eventpublisher.SpringAppActionEventPublisher
 import org.rundeck.features.menu.FeatureMenuItem
 import org.rundeck.features.output.MemoryFeatureActionOutputStore
 import org.rundeck.features.registry.SpringFeatureRegistry
+import org.rundeck.features.service.FeatureActionExecutorService
 import org.rundeck.security.*
 import org.rundeck.spi.data.BaseDataManager
 import org.rundeck.web.ExceptionHandler
@@ -836,4 +837,7 @@ beans={
     actionOutputEventListener(ActionOutputEventListener)
     featureSetConfigProvider(ConfigurationServiceFeatureSetConfigProvider)
     featureMenuItem(FeatureMenuItem)
+    featureActionExecutorService(FeatureActionExecutorService)
+    eventBusFeatureActionExecutorService(EventBusFeatureActionExecutorService)
+
 }

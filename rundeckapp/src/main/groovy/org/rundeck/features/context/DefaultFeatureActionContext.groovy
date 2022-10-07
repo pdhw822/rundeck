@@ -6,15 +6,18 @@ import com.rundeck.feature.api.event.ActionEventPublisher
 class DefaultFeatureActionContext implements FeatureActionContext {
 
     String actionId;
+    String user;
+    String producer;
     Map<String, Object> context = new HashMap<>();
     ActionEventPublisher eventPublisher;
 
-    DefaultFeatureActionContext(String actionId, ActionEventPublisher eventPublisher) {
+    DefaultFeatureActionContext(String actionId, String user, String producer, ActionEventPublisher eventPublisher) {
         this.actionId = actionId
+        this.user = user
+        this.producer = producer
         this.eventPublisher = eventPublisher
     }
 
-    @Override
     public void put(String key, Object contextObject) {
         context.put(key, contextObject);
     }

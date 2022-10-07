@@ -6,6 +6,8 @@ import com.rundeck.feature.api.output.OutputLevel
 
 class DefaultActionCompleteEvent implements ActionCompleteEvent {
     String actionId
+    String user
+    String producer
     CompletionStatus status
     Long timestamp = System.nanoTime()
 }
